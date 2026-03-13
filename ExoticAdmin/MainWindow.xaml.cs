@@ -527,8 +527,8 @@ namespace ExoticAdmin
                 string displayName = string.IsNullOrWhiteSpace(selectedUser.FullName) ? selectedUser.Username : selectedUser.FullName;
 
                 string promptMessage = selectedUser.IsDriver
-    ? $"Biztosan törölni szeretnéd az alábbi sofőrt?\n\n{displayName}"
-    : $"Biztosan törölni szeretnéd az alábbi felhasználót?\n\n{displayName}";
+                    ? $"Biztosan törölni szeretnéd az alábbi sofőrt?\n\n{displayName}"
+                    : $"Biztosan törölni szeretnéd az alábbi felhasználót?\n\n{displayName}";
 
                 string toastMessage = selectedUser.IsDriver ? "🗑️ Sofőr törölve." : "🗑️ Felhasználó törölve.";
 
