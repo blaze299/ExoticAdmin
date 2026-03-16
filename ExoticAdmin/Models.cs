@@ -62,8 +62,8 @@ namespace ExoticAdmin
     public class Order
     {
         public int Id { get; set; }
-        public int UserId { get; set; }      // ÚJ
-        public int VehicleId { get; set; }   // ÚJ
+        public int UserId { get; set; } 
+        public int VehicleId { get; set; }
         public string CustomerName { get; set; }
         public string VehicleName { get; set; }
         public DateTime StartDate { get; set; }
