@@ -1,27 +1,10 @@
-﻿<Window x:Class="ExoticAdmin.UserEditWindow"
+<Window x:Class="ExoticAdmin.UserEditWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Felhasználó Részletes Adatai" Height="650" Width="450"
         Background="{StaticResource PrimaryBlack}" WindowStartupLocation="CenterOwner">
 
     <Window.Resources>
-        <Style x:Key="FlatButtonStyle" TargetType="Button">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="5">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Opacity" Value="0.8"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Margin" Value="0,15,0,5"/>
@@ -78,26 +61,14 @@
                 <TextBlock Text="Jogosítvány lejárata (ÉÉÉÉ-HH-NN)"/>
                 <TextBox x:Name="txtLicenseExpiry"/>
 
-                <Rectangle Height="1" Fill="#444" Margin="0,20,0,10"/>
-                <TextBlock Text="🚨 Adminisztrátori Beállítások" Foreground="#FF6B6B" FontSize="16" FontWeight="Bold"/>
-
-                <CheckBox x:Name="chkIsBanned" Content="🚫 FELHASZNÁLÓ TILTÁSA (Feketelista)" Foreground="#FF6B6B" FontSize="14" FontWeight="Bold" Margin="0,10,0,10"/>
-
-                <TextBlock Text="Belső megjegyzés (Ügyfél nem látja)"/>
-                <TextBox x:Name="txtAdminNotes" TextWrapping="Wrap" Height="60" AcceptsReturn="True"/>
-
                 <CheckBox x:Name="chkIsVerified" Content="Fiók hitelesítve (Verified)" Foreground="{StaticResource AccentGold}" FontSize="14" Margin="0,20,0,10"/>
 
             </StackPanel>
         </ScrollViewer>
 
-        <Grid Grid.Row="2" Margin="0,20,0,0">
-            <Button Content="🔑 Új jelszó generálása" Style="{StaticResource FlatButtonStyle}" Width="160" Padding="12" Background="#2196F3" Foreground="White" BorderThickness="0" Click="BtnGeneratePassword_Click" Cursor="Hand" HorizontalAlignment="Left"/>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Mégse" Style="{StaticResource FlatButtonStyle}" Width="80" Padding="12" Background="#444" Foreground="White" BorderThickness="0" Margin="0,0,10,0" Click="BtnCancel_Click" Cursor="Hand"/>
-                <Button Content="Mentés" Style="{StaticResource FlatButtonStyle}" Width="100" Padding="12" Background="{StaticResource AccentGold}" Foreground="Black" FontWeight="Bold" BorderThickness="0" Click="BtnSave_Click" Cursor="Hand"/>
-            </StackPanel>
-        </Grid>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Mégse" Width="100" Padding="12" Background="#444" Foreground="White" BorderThickness="0" Margin="0,0,10,0" Click="BtnCancel_Click" Cursor="Hand"/>
+            <Button Content="Mentés" Width="150" Padding="12" Background="{StaticResource AccentGold}" Foreground="Black" FontWeight="Bold" BorderThickness="0" Click="BtnSave_Click" Cursor="Hand"/>
+        </StackPanel>
     </Grid>
 </Window>
