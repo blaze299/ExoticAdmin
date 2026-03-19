@@ -1,87 +1,43 @@
-﻿using MySql.Data.MySqlClient;
+using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 using System.Windows;
 
 namespace ExoticAdmin
 {
-    public partial class OrderEditWindow : Window
+    public partial class UserEditWindow : Window
     {
-        private Order _order;
+        private User _user;
         private string connectionString = "Server=127.0.0.1;Database=exotic_rentals;Uid=root;Pwd=;";
 
-        public class ComboItem
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-        }
-
-        public OrderEditWindow(Order order)
+        public UserEditWindow(User user)
         {
             InitializeComponent();
-            _order = order;
-            LoadComboBoxes();
+            _user = user;
 
-            if (_order.Id != 0)
+            // Betöltjük a meglévő adatokat, ha szerkesztésről van szó
+            if (_user.Id != 0)
             {
-                cmbCustomer.SelectedValue = _order.UserId;
-                cmbVehicle.SelectedValue = _order.VehicleId;
-                txtStart.Text = _order.StartDate.ToString("yyyy-MM-dd");
-                txtEnd.Text = _order.EndDate.ToString("yyyy-MM-dd");
-                txtPrice.Text = _order.TotalPrice.ToString();
+                txtUsername.Text = _user.Username;
+                txtFullName.Text = _user.FullName;
+                txtEmail.Text = _user.Email;
+                txtPhone.Text = _user.PhoneNumber;
+                txtClearance.Text = _user.Clearance.ToString();
+                txtLicense.Text = _user.LicenseNumber;
+
+                // Dátumok formázása (ha van adat)
+                if (_user.DateOfBirth.HasValue) txtDob.Text = _user.DateOfBirth.Value.ToString("yyyy-MM-dd");
+                if (_user.LicenseExpiryDate.HasValue) txtLicenseExpiry.Text = _user.LicenseExpiryDate.Value.ToString("yyyy-MM-dd");
+
+                chkIsVerified.IsChecked = _user.IsVerified;
             }
             else
             {
-                txtStart.Text = DateTime.Today.ToString("yyyy-MM-dd");
-                txtEnd.Text = DateTime.Today.AddDays(1).ToString("yyyy-MM-dd");
-                txtPrice.Text = "0";
+                txtClearance.Text = "1"; // Alapból sima felhasználó
             }
-        }
-
-        private void LoadComboBoxes()
-        {
-            List<ComboItem> customers = new List<ComboItem>();
-            List<ComboItem> vehicles = new List<ComboItem>();
-
-            try
-            {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
-                {
-                    conn.Open();
-                    using (MySqlCommand cmd = new MySqlCommand("SELECT id, username, full_name FROM users", conn))
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            string fname = reader.IsDBNull(2) ? "" : reader.GetString(2);
-                            string uname = reader.GetString(1);
-                            customers.Add(new ComboItem { Id = reader.GetInt32(0), Name = string.IsNullOrEmpty(fname) ? uname : fname });
-                        }
-                    }
-
-                    using (MySqlCommand cmd = new MySqlCommand("SELECT id, brand, model FROM vehicles", conn))
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            vehicles.Add(new ComboItem { Id = reader.GetInt32(0), Name = $"{reader.GetString(1)} {reader.GetString(2)}" });
-                        }
-                    }
-                }
-                cmbCustomer.ItemsSource = customers;
-                cmbVehicle.ItemsSource = vehicles;
-            }
-            catch (Exception ex) { MessageBox.Show("Hiba az adatok betöltésekor: " + ex.Message); }
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (cmbCustomer.SelectedValue == null || cmbVehicle.SelectedValue == null)
-            {
-                MessageBox.Show("Kérlek válassz ügyfelet és autót is!", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
             try
             {
                 using (MySqlConnection conn = new MySqlConnection(connectionString))
@@ -89,36 +45,56 @@ namespace ExoticAdmin
                     conn.Open();
                     string query;
 
-                    if (_order.Id == 0) // ÚJ BÉRLÉS FELVÉTELE
+                    if (_user.Id == 0) // ÚJ FELHASZNÁLÓ (A jelszó mező miatt itt egy alapértelmezett titkosított jelszót adunk)
                     {
-                        query = @"INSERT INTO orders (user_id, vehicle_id, start_date, end_date, total_price, status) 
-                                  VALUES (@uid, @vid, @start, @end, @price, @status)";
+                        query = @"INSERT INTO users 
+                                (username, full_name, email, phoneNumber, clearance, license_number, date_of_birth, license_expiry_date, is_verified, password) 
+                                VALUES 
+                                (@user, @name, @email, @phone, @clearance, @license, @dob, @expiry, @verified, '$2a$12$K7O8DqM2f8L2/VzQ4W5E.OeB8jG9h1i2k3l4m5n6o7p8q9r0s1t2u')";
+                        // (A hash a 'teszt' jelszó egy generált bcrypt változata, mivel a DB nem enged NULL jelszót)
                     }
-                    else // MEGLÉVŐ FRISSÍTÉSE
+                    else // FRISSÍTÉS
                     {
-                        query = @"UPDATE orders SET user_id=@uid, vehicle_id=@vid, start_date=@start, end_date=@end, total_price=@price WHERE id=@id";
+                        query = @"UPDATE users 
+                                SET username=@user, full_name=@name, email=@email, phoneNumber=@phone, clearance=@clearance, 
+                                license_number=@license, date_of_birth=@dob, license_expiry_date=@expiry, is_verified=@verified 
+                                WHERE id=@id";
                     }
 
                     using (MySqlCommand cmd = new MySqlCommand(query, conn))
                     {
-                        cmd.Parameters.AddWithValue("@uid", cmbCustomer.SelectedValue);
-                        cmd.Parameters.AddWithValue("@vid", cmbVehicle.SelectedValue);
-                        cmd.Parameters.AddWithValue("@start", DateTime.Parse(txtStart.Text));
-                        cmd.Parameters.AddWithValue("@end", DateTime.Parse(txtEnd.Text));
-                        cmd.Parameters.AddWithValue("@price", decimal.Parse(txtPrice.Text));
-                        cmd.Parameters.AddWithValue("@status", _order.Id == 0 ? 1 : _order.Status); // Új alapértelmezetten Függőben
+                        cmd.Parameters.AddWithValue("@user", txtUsername.Text);
+                        cmd.Parameters.AddWithValue("@name", txtFullName.Text);
+                        cmd.Parameters.AddWithValue("@email", txtEmail.Text);
+                        cmd.Parameters.AddWithValue("@phone", txtPhone.Text);
+                        cmd.Parameters.AddWithValue("@license", txtLicense.Text);
 
-                        if (_order.Id != 0) cmd.Parameters.AddWithValue("@id", _order.Id);
+                        cmd.Parameters.AddWithValue("@clearance", int.TryParse(txtClearance.Text, out int c) ? c : 1);
+                        cmd.Parameters.AddWithValue("@verified", chkIsVerified.IsChecked == true ? 1 : 0);
+
+                        // Dátumok biztonságos konvertálása (Ha üres vagy hibás, akkor NULL megy az adatbázisba)
+                        if (DateTime.TryParse(txtDob.Text, out DateTime dob))
+                            cmd.Parameters.AddWithValue("@dob", dob);
+                        else
+                            cmd.Parameters.AddWithValue("@dob", DBNull.Value);
+
+                        if (DateTime.TryParse(txtLicenseExpiry.Text, out DateTime expiry))
+                            cmd.Parameters.AddWithValue("@expiry", expiry);
+                        else
+                            cmd.Parameters.AddWithValue("@expiry", DBNull.Value);
+
+                        if (_user.Id != 0) cmd.Parameters.AddWithValue("@id", _user.Id);
 
                         cmd.ExecuteNonQuery();
                     }
                 }
+
                 this.DialogResult = true;
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Hiba a mentés során (ellenőrizd a dátum formátumát): \n" + ex.Message, "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Hiba a mentés során (ellenőrizd, hogy a felhasználónév/email nem foglalt-e): \n" + ex.Message, "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
