@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Media;
+using System;
 
 namespace ExoticAdmin
 {
@@ -27,14 +26,9 @@ namespace ExoticAdmin
         public string Description { get; set; }
         public int TimesRented { get; set; }
         public int Status { get; set; }
-        public string ImageUrl { get; set; }
 
-        public DateTime? MotExpiry { get; set; }
-        public int CurrentMileage { get; set; }
-        public string MaintenanceNotes { get; set; }
-
-        public string StatusName => Status == 1 ? "✔️ Elérhető" : Status == 2 ? "🚗 Kiadva" : "🔧 Szervizben";
-        public string StatusColor => Status == 1 ? "#4CAF50" : Status == 2 ? "#2196F3" : "#F44336";
+        public string StatusName => Status == 1 ? "Elérhető" : Status == 2 ? "Kiadva" : "Szervizben";
+        public string StatusColor => Status == 1 ? "#4CAF50" : Status == 2 ? "#FFC107" : "#F44336";
         public string DisplayName => $"{Brand} {Model} ({Year})";
     }
 
@@ -50,56 +44,11 @@ namespace ExoticAdmin
         public DateTime? DateOfBirth { get; set; }
         public DateTime? LicenseExpiryDate { get; set; }
         public bool IsVerified { get; set; }
-        public bool IsDriver { get; set; }
-        public bool IsBanned { get; set; }
-        public string AdminNotes { get; set; }
 
         public string RoleName => Clearance == 3 ? "Admin" : Clearance == 2 ? "Sofőr" : "Felhasználó";
-        public string VerifiedText => IsBanned ? "🚫 TILTÓLISTÁN" : (IsVerified ? "✔ Hitelesítve" : "✖ Nincs hitelesítve");
-        public string VerifiedColor => IsBanned ? "#FF6B6B" : (IsVerified ? "#4CAF50" : "#F44336");
-    }
 
-    public class Order
-    {
-        public int Id { get; set; }
-        public int UserId { get; set; } 
-        public int VehicleId { get; set; }
-        public string CustomerName { get; set; }
-        public string VehicleName { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public decimal TotalPrice { get; set; }
-        public int Status { get; set; }
-
-        public string StatusName => Status == 1 ? "Függőben" : Status == 2 ? "Aktív" : "Befejezve";
-        public string StatusIcon => Status == 1 ? "⏳" : Status == 2 ? "🟢" : "✔️";
-
-        public SolidColorBrush StatusColor
-        {
-            get
-            {
-                switch (Status)
-                {
-                    case 1: return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4A90E2")); // KÉK
-                    case 2: return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50")); // ZÖLD
-                    case 3: return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF4B4B")); // PIROS
-                    default: return Brushes.Gray;
-                }
-            }
-        }
-
-        public int StatusIndex
-        {
-            get => Status - 1;
-            set => Status = value + 1;
-        }
-    }
-
-    public class ChartItem
-    {
-        public string Label { get; set; }
-        public double Value { get; set; }
-        public double Width { get; set; }
-        public string DisplayValue => $"{Value:N0} €";
+        // --- ÚJ UI SEGÉDMEZŐK A HITELESÍTÉSHEZ ---
+        public string VerifiedText => IsVerified ? "✔ Hitelesítve" : "✖ Nincs hitelesítve";
+        public string VerifiedColor => IsVerified ? "#4CAF50" : "#F44336"; // Zöld vagy Piros
     }
 }
